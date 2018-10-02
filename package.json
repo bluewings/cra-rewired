@@ -1,0 +1,42 @@
+{
+  "name": "cra-rewired",
+  "version": "1.0.0",
+  "description": "override create-react-app config without eject",
+  "author": {
+    "name": "Sung Won Cha",
+    "email": "mygenie3@naver.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bluewings/cra-rewired.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bluewings/cra-rewired/issues"
+  },
+  "engines": {
+    "node": ">8.0.0"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "minimist": "^1.2.0",
+    "proxyquire": "^2.1.0",
+    "rewire": "^4.0.1"
+  },
+  "peerDependencies": {
+    "react": "^15.0.0 || ^16.0.0",
+    "react-dom": "^15.0.0 || ^16.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-transform-runtime": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-plugin-annotate-pure-calls": "^0.3.0"
+  }
+}
