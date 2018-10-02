@@ -2,6 +2,7 @@
 // https://daveceddia.com/customize-create-react-app-webpack-without-ejecting/
 const path = require('path');
 const _ = require('lodash');
+const entries = require('object.entries');
 const rewire = require('rewire');
 const proxyquire = require('proxyquire');
 const minimist = require('minimist');
@@ -84,28 +85,42 @@ const flattenMessages = (nestedMessages, prefix = '') => Object.keys(nestedMessa
   return messages;
 }, {});
 
-function getConfig(config, paths, overrides) {
-  const {
-    oneOf,
-  } = overrides(paths);
-
-  const jsonPath = Object.keys(flattenMessages(config.module.rules))
-    .filter(e => e.search(/\.oneOf\./) !== -1)
-    .map(e => e.replace(/(\.oneOf)\..*$/, '$1').split('.'))[0].map((e) => {
-      const num = parseInt(e, 10);
-      return isNaN(num) ? e : `[${num}]`;
-    }).join('.');
-
-  let target = _.get(config.module.rules, jsonPath);
-  if (oneOf.$unshift) {
-    target = [
-      ...oneOf.$unshift,
-      ...target,
-    ];
+function getJsonPath(needle, config) {
+  const [path1, path2] = needle.split('...');
+  if (path1 && path2) {
+    const root = _.get(config, path1);
+    return [
+      path1,
+      Object.keys(flattenMessages(root))
+      .filter(e => e.search(path2) !== -1)[0]
+      .split(path2)[0] + path2
+    ].join('.').replace(/\.([0-9]+)\./g, '[$1].')
   }
+  return path1;
+}
 
-  _.set(config.module.rules, jsonPath, target);
+function getConfig(config, paths, getCustoms) {
+  const customs = getCustoms(paths);
 
+  entries(customs).forEach(([needle, custom]) => {
+    const jsonPath = getJsonPath(needle, config);
+    let target = _.get(config, jsonPath);
+    if (target) {
+      entries(custom).forEach(([operation, value]) => {
+        switch (operation) {
+          case '$unshift':
+            target = [...value, ...target];
+            break;
+          case '$push':
+            target = [...target, ...value];
+            break;
+          default:
+            break;
+        }
+      })
+      _.set(config, jsonPath, target);
+    }
+  })
 
   return config;
 }
