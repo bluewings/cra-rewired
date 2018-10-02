@@ -1,6 +1,6 @@
 {
   "name": "cra-rewired",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "override create-react-app config without eject",
   "author": {
     "name": "Sung Won Cha",
@@ -17,7 +17,10 @@
   "engines": {
     "node": ">8.0.0"
   },
-  "main": "src/index.js",
+  "main": "./src/index.js",
+  "bin": {
+    "cra-rewired": "./src/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
