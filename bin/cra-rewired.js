@@ -116,6 +116,12 @@ function getConfig(config, paths, getCustoms) {
           case '$push':
             target = [...target, ...value];
             break;
+          case '$set':
+            target = {
+              ...target,
+              ...value,
+            };
+            break;
           default:
             break;
         }
