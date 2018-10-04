@@ -8,7 +8,6 @@ const entries = require('object.entries');
 const rewire = require('rewire');
 const proxyquire = require('proxyquire');
 const minimist = require('minimist');
-const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 
 function getArgs() {
   const argv = minimist(process.argv.slice(2));
@@ -108,17 +107,12 @@ function getConfig(config, paths, getCustoms) {
   const customs = getCustoms(paths);
 
   if (customs.$moduleScope) {
-    config.resolve.plugins = config.resolve.plugins.map(plugin => {
-      if (plugin instanceof ModuleScopePlugin) {
-        const moduleScope = Array.isArray(customs.$moduleScope) ? customs.$moduleScope : [customs.$moduleScope];
-        return new ModuleScopePlugin([
-          ...plugin.appSrcs,
-          ...moduleScope,
-        ], [
-          ...plugin.allowedFiles,
-        ]);
+    config.resolve.plugins = config.resolve.plugins.forEach(plugin => {
+      if (plugin.constructor.name === 'ModuleScopePlugin') {
+        const moduleScope = Array.isArray(customs.$moduleScope) ?
+          customs.$moduleScope : [customs.$moduleScope];
+        plugin.appSrcs = [...plugin.appSrcs, ...moduleScope];
       }
-      return plugin;
     })
   }
 
