@@ -24,7 +24,7 @@ function getArgs() {
     config: undefined,
   };
 
-  Object.keys(argv).forEach((e) => {
+  Object.keys(argv).forEach(e => {
     const key = args[e] ? e : short[e];
     if (key in args && typeof argv[e] === 'string') {
       args = {
@@ -78,16 +78,17 @@ function rewireModule(modulePath, customizer) {
   });
 }
 
-const flattenMessages = (nestedMessages, prefix = '') => Object.keys(nestedMessages).reduce((messages, key) => {
-  const value = nestedMessages[key];
-  const prefixedKey = prefix ? `${prefix}.${key}` : key;
-  if (typeof value !== 'object' || value === null) {
-    messages[prefixedKey] = value;
-  } else {
-    Object.assign(messages, flattenMessages(value, prefixedKey));
-  }
-  return messages;
-}, {});
+const flattenMessages = (nestedMessages, prefix = '') =>
+  Object.keys(nestedMessages).reduce((messages, key) => {
+    const value = nestedMessages[key];
+    const prefixedKey = prefix ? `${prefix}.${key}` : key;
+    if (typeof value !== 'object' || value === null) {
+      messages[prefixedKey] = value;
+    } else {
+      Object.assign(messages, flattenMessages(value, prefixedKey));
+    }
+    return messages;
+  }, {});
 
 function getJsonPath(needle, config) {
   const [path1, path2] = needle.split('...');
@@ -96,9 +97,11 @@ function getJsonPath(needle, config) {
     return [
       path1,
       Object.keys(flattenMessages(root))
-      .filter(e => e.search(path2) !== -1)[0]
-      .split(path2)[0] + path2
-    ].join('.').replace(/\.([0-9]+)\./g, '[$1].')
+        .filter(e => e.search(path2) !== -1)[0]
+        .split(path2)[0] + path2,
+    ]
+      .join('.')
+      .replace(/\.([0-9]+)\./g, '[$1].');
   }
   return path1;
 }
@@ -109,11 +112,21 @@ function getConfig(config, paths, getCustoms) {
   if (customs.$moduleScope) {
     config.resolve.plugins = config.resolve.plugins.forEach(plugin => {
       if (plugin.constructor.name === 'ModuleScopePlugin') {
-        const moduleScope = Array.isArray(customs.$moduleScope) ?
-          customs.$moduleScope : [customs.$moduleScope];
-        plugin.appSrcs = [...plugin.appSrcs, ...moduleScope];
+        // https://github.com/facebook/create-react-app/commit/1922f4d4d8cf54c20237d38691cd5bee154f032e#diff-c17bf19ab7e052d143c785608119dc91
+        // Before the commit on Mar 23, 2018, there was no appSrcs option.
+        if (plugin.appSrcs) {
+          const moduleScope = Array.isArray(customs.$moduleScope)
+            ? customs.$moduleScope
+            : [customs.$moduleScope];
+          plugin.appSrcs = [...plugin.appSrcs, ...moduleScope];
+        } else {
+          if (typeof customs.$moduleScope !== 'string') {
+            throw new Error('$moduleScope must be a string.');
+          }
+          plugin.appSrc = customs.$moduleScope;
+        }
       }
-    })
+    });
   }
 
   entries(customs).forEach(([needle, custom]) => {
@@ -137,10 +150,10 @@ function getConfig(config, paths, getCustoms) {
           default:
             break;
         }
-      })
+      });
       _.set(config, jsonPath, target);
     }
-  })
+  });
 
   return config;
 }
@@ -148,39 +161,46 @@ function getConfig(config, paths, getCustoms) {
 const args = getArgs();
 
 switch (args.mode) {
-  case 'start':
-    // The "start" script is run during development mode
-    {
-      rewireModule(`${args.script}/scripts/start.js`, loadCustomizer(args.config));
-      break;
-    }
+  // The "start" script is run during development mode
+  case 'start': {
+    rewireModule(
+      `${args.script}/scripts/start.js`,
+      loadCustomizer(args.config)
+    );
+    break;
+  }
 
-  case 'build':
-    // The "build" script is run to produce a production bundle
-    {
-      rewireModule(`${args.script}/scripts/build.js`, loadCustomizer(args.config));
-      break;
-    }
+  // The "build" script is run to produce a production bundle
+  case 'build': {
+    rewireModule(
+      `${args.script}/scripts/build.js`,
+      loadCustomizer(args.config)
+    );
+    break;
+  }
 
-  case 'test':
-    // The "test" script runs all the tests with Jest
-    {
-      // Load customizations from the config-overrides.testing file.
-      // That file should export a single function that takes a config and returns a config
-      const customizer = loadCustomizer(args.config);
-      proxyquire(`${args.script}/scripts/test.js`, {
-        // When test.js asks for '../utils/createJestConfig' it will get this instead:
-        '../utils/createJestConfig': (...args) => {
-          // Use the existing createJestConfig function to create a config, then pass
-          // it through the customizer
-          const createJestConfig = require(`${args.script}/utils/createJestConfig`);
-          return customizer(createJestConfig(...args));
-        },
-      });
-      break;
-    }
+  // The "test" script runs all the tests with Jest
+  case 'test': {
+    // Load customizations from the config-overrides.testing file.
+    // That file should export a single function that takes a config and returns a config
+    const customizer = loadCustomizer(args.config);
+    proxyquire(`${args.script}/scripts/test.js`, {
+      // When test.js asks for '../utils/createJestConfig' it will get this instead:
+      '../utils/createJestConfig': (...args) => {
+        // Use the existing createJestConfig function to create a config, then pass
+        // it through the customizer
+        const createJestConfig = require(`${
+          args.script
+        }/utils/createJestConfig`);
+        return customizer(createJestConfig(...args));
+      },
+    });
+    break;
+  }
 
   default:
-    console.log('customized-config only supports "start", "build", and "test" options.');
+    console.log(
+      'customized-config only supports "start", "build", and "test" options.'
+    );
     process.exit(-1);
 }
