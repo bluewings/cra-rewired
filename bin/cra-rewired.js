@@ -8,6 +8,7 @@ const entries = require('object.entries');
 const rewire = require('rewire');
 const proxyquire = require('proxyquire');
 const minimist = require('minimist');
+const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 
 function getArgs() {
   const argv = minimist(process.argv.slice(2));
@@ -72,7 +73,9 @@ function rewireModule(modulePath, customizer) {
   // modify that reference.
   const config = defaults.__get__('config');
   const paths = defaults.__get__('paths');
-  customizer(config, { ...paths
+
+  customizer(config, {
+    ...paths,
   });
 }
 
@@ -103,6 +106,21 @@ function getJsonPath(needle, config) {
 
 function getConfig(config, paths, getCustoms) {
   const customs = getCustoms(paths);
+
+  if (customs.$moduleScope) {
+    config.resolve.plugins = config.resolve.plugins.map(plugin => {
+      if (plugin instanceof ModuleScopePlugin) {
+        const moduleScope = Array.isArray(customs.$moduleScope) ? customs.$moduleScope : [customs.$moduleScope];
+        return new ModuleScopePlugin([
+          ...plugin.appSrcs,
+          ...moduleScope,
+        ], [
+          ...plugin.allowedFiles,
+        ]);
+      }
+      return plugin;
+    })
+  }
 
   entries(customs).forEach(([needle, custom]) => {
     const jsonPath = getJsonPath(needle, config);
