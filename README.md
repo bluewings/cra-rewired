@@ -8,16 +8,15 @@ You can add loaders or change other webpack configs without ```npm run eject``` 
 create-react-app my-app
 cd my-app
 npm install cra-rewired --save-dev
+echo "SKIP_PREFLIGHT_CHECK=true" >> .env
 ```
 
 Then create a custom options file. This example adds a loader that loads the contents of the yaml file json.
 ```js
 // webpack.custom.js
-var path = require('path');
-
 module.exports = function (paths) {
   return {
-     // path in webpack.config
+    // path in webpack.config
     'module.rules...oneOf': {
       // operation: $unshift | $push | $set
       $unshift: [
