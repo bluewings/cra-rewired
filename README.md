@@ -3,7 +3,7 @@
 You can add loaders or change other webpack configs without ```npm run eject``` from ```create-react-app```
 
 
-## Examples
+## [Examples](https://github.com/bluewings/cra-rewired/tree/master/examples)
 
 - adding yaml-loader: [source](https://github.com/bluewings/cra-rewired/tree/master/examples/add-yaml-loader), [changes](https://github.com/bluewings/cra-rewired/commit/b7e17ad0e172716d510333bfe6e74d902e559037)
 - adding pug-as-jsx-loader: [source](https://github.com/bluewings/cra-rewired/tree/master/examples/pug-as-jsx-loader), [changes](https://github.com/bluewings/cra-rewired/commit/d111c2f77ff8be359c592b6fc18a066055b07d59)
