@@ -7,10 +7,13 @@
     "react-dom": "^16.5.2"
   },
   "devDependencies": {
+    "babel-loader": "^8.0.4",
+    "cra-rewired": "^1.0.8",
+    "pug-as-jsx-loader": "^1.0.59",
     "react-scripts": "2.0.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "cra-rewired -s react-scripts -m start -c webpack.custom.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
