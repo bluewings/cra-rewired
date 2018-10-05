@@ -45,6 +45,8 @@ Update ```scripts.start``` in ```package.json``` as follows.
 }
 ```
 
+[Check the changes to apply yaml-loader.](https://github.com/bluewings/cra-rewired/commit/b7e17ad0e172716d510333bfe6e74d902e559037)
+
 Now you can import yaml file contents.
 
 ```js
