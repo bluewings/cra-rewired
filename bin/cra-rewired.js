@@ -24,7 +24,7 @@ function getArgs() {
     config: undefined,
   };
 
-  Object.keys(argv).forEach(e => {
+  Object.keys(argv).forEach((e) => {
     const key = args[e] ? e : short[e];
     if (key in args && typeof argv[e] === 'string') {
       args = {
@@ -47,8 +47,7 @@ function getArgs() {
 function loadCustomizer(module) {
   try {
     const custom = require(module);
-
-    return (config, paths) => getConfig(config, paths, custom);
+    return (config, paths, packageJson, shared) => getConfig(config, paths, packageJson, shared, custom);
   } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') {
       throw e;
@@ -72,10 +71,37 @@ function rewireModule(modulePath, customizer) {
   // modify that reference.
   const config = defaults.__get__('config');
   const paths = defaults.__get__('paths');
+  const prepareProxy = defaults.__get__('prepareProxy');
 
-  customizer(config, {
-    ...paths,
-  });
+  const shared = {};
+
+  if (typeof prepareProxy === 'function') {
+    defaults.__set__('prepareProxy', (...args) => {
+      let proxy = prepareProxy(...args);
+      if (shared.$proxyConfig) {
+        proxy = (Array.isArray(proxy) ? proxy : [proxy]).filter(e => e);
+        proxy = shared.$proxyConfig.reduce((prev, { operation, value }) => {
+          let next = prev;
+          switch (operation) {
+            case '$unshift':
+              next = [...value, ...next];
+              break;
+            case '$push':
+              next = [...next, ...value];
+              break;
+            default:
+              break;
+          }
+          return next;
+        }, proxy);
+      }
+      return proxy;
+    });
+  }
+
+  const packageJson = require(paths.appPackageJson);
+
+  customizer(config, { ...paths }, { ...packageJson }, shared);
 }
 
 const flattenMessages = (nestedMessages, prefix = '') =>
@@ -106,18 +132,22 @@ function getJsonPath(needle, config) {
   return path1;
 }
 
-function getConfig(config, paths, getCustoms) {
-  const customs = getCustoms(paths);
+function getConfig(config, paths, packageJson, shared, getCustoms) {
+  const customs = getCustoms(paths, packageJson);
+
+  if (customs.$proxyConfig) {
+    shared.$proxyConfig = entries(customs.$proxyConfig)
+      .map(([operation, value]) => ({ operation, value }));
+  }
 
   if (customs.$moduleScope) {
-    config.resolve.plugins = config.resolve.plugins.forEach(plugin => {
+    config.resolve.plugins = config.resolve.plugins.forEach((plugin) => {
       if (plugin.constructor.name === 'ModuleScopePlugin') {
         // https://github.com/facebook/create-react-app/commit/1922f4d4d8cf54c20237d38691cd5bee154f032e#diff-c17bf19ab7e052d143c785608119dc91
         // Before the commit on Mar 23, 2018, there was no appSrcs option.
         if (plugin.appSrcs) {
-          const moduleScope = Array.isArray(customs.$moduleScope)
-            ? customs.$moduleScope
-            : [customs.$moduleScope];
+          const moduleScope = Array.isArray(customs.$moduleScope) ?
+            customs.$moduleScope : [customs.$moduleScope];
           plugin.appSrcs = [...plugin.appSrcs, ...moduleScope];
         } else {
           if (typeof customs.$moduleScope !== 'string') {
@@ -165,7 +195,7 @@ switch (args.mode) {
   case 'start': {
     rewireModule(
       `${args.script}/scripts/start.js`,
-      loadCustomizer(args.config)
+      loadCustomizer(args.config),
     );
     break;
   }
@@ -174,7 +204,7 @@ switch (args.mode) {
   case 'build': {
     rewireModule(
       `${args.script}/scripts/build.js`,
-      loadCustomizer(args.config)
+      loadCustomizer(args.config),
     );
     break;
   }
@@ -189,9 +219,7 @@ switch (args.mode) {
       '../utils/createJestConfig': (...args) => {
         // Use the existing createJestConfig function to create a config, then pass
         // it through the customizer
-        const createJestConfig = require(`${
-          args.script
-        }/utils/createJestConfig`);
+        const createJestConfig = require(`${args.script}/utils/createJestConfig`);
         return customizer(createJestConfig(...args));
       },
     });
@@ -199,8 +227,6 @@ switch (args.mode) {
   }
 
   default:
-    console.log(
-      'customized-config only supports "start", "build", and "test" options.'
-    );
+    console.log('customized-config only supports "start", "build", and "test" options.');
     process.exit(-1);
 }
