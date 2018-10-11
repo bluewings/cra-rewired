@@ -71,7 +71,10 @@ function rewireModule(modulePath, customizer) {
   // modify that reference.
   const config = defaults.__get__('config');
   const paths = defaults.__get__('paths');
-  const prepareProxy = defaults.__get__('prepareProxy');
+  let prepareProxy;
+  try {
+    prepareProxy = defaults.__get__('prepareProxy');
+  } catch (err) { /* ignore */ }
 
   const shared = {};
 
