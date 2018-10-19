@@ -59,6 +59,22 @@ function loadCustomizer(module) {
   return config => config;
 }
 
+function aggregate(data, stageOrStages) {
+  const stages = Array.isArray(stageOrStages) ? stageOrStages : [stageOrStages];
+  return stages.reduce((prev, stage) => {
+    const match = typeof stage.$match === 'function' ? stage.$match : () => true;
+    return prev.map(e => {
+      if (!match(e)) {
+        return e;
+      }
+      if (typeof stage.$update === 'function') {
+        return stage.$update(e);
+      }
+      return e;
+    });
+  }, data);
+}
+
 function rewireModule(modulePath, customizer) {
   // Load the module with `rewire`, which allows modifying the
   // script's internal variables.
@@ -124,11 +140,11 @@ function getJsonPath(needle, config) {
   if (path1 && path2) {
     const root = _.get(config, path1);
     return [
-      path1,
-      Object.keys(flattenMessages(root))
+        path1,
+        Object.keys(flattenMessages(root))
         .filter(e => e.search(path2) !== -1)[0]
         .split(path2)[0] + path2,
-    ]
+      ]
       .join('.')
       .replace(/\.([0-9]+)\./g, '[$1].');
   }
@@ -168,6 +184,9 @@ function getConfig(config, paths, packageJson, shared, getCustoms) {
     if (target) {
       entries(custom).forEach(([operation, value]) => {
         switch (operation) {
+          case '$aggregate':
+            target = aggregate(target, value);
+            break;
           case '$unshift':
             target = [...value, ...target];
             break;
