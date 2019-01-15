@@ -85,7 +85,13 @@ function rewireModule(modulePath, customizer) {
   // The customizer should *mutate* the config object, because
   // react-scripts imports the config as a `const` and we can't
   // modify that reference.
-  const config = defaults.__get__('config');
+  let config;
+  let configFactory;
+  try {
+    config = defaults.__get__('config');
+  } catch(ignore) {
+    configFactory = defaults.__get__('configFactory');
+  }
   const paths = defaults.__get__('paths');
   let prepareProxy;
   try {
@@ -120,7 +126,19 @@ function rewireModule(modulePath, customizer) {
 
   const packageJson = require(paths.appPackageJson);
 
-  customizer(config, { ...paths }, { ...packageJson }, shared);
+  const updateConfig = (configOpts) => {
+    customizer(configOpts, { ...paths }, { ...packageJson }, shared);
+  };
+
+  if (config) {
+    updateConfig(config);
+  } else if (configFactory) {
+    defaults.__set__('configFactory', (webpackEnv) => {
+      const configOpts = configFactory(webpackEnv);
+      updateConfig(configOpts);
+      return configOpts;
+    });
+  }
 }
 
 const flattenMessages = (nestedMessages, prefix = '') =>
