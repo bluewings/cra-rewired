@@ -114,6 +114,11 @@ function rewireModule(modulePath, customizer) {
             case '$push':
               next = [...next, ...value];
               break;
+            case '$filter':
+              if (typeof value === 'function') {
+                next = next.filter(value);
+              }
+              break;
             default:
               break;
           }
@@ -216,6 +221,11 @@ function getConfig(config, paths, packageJson, shared, getCustoms) {
               ...target,
               ...value,
             };
+            break;
+          case '$filter':
+            if (typeof value === 'function') {
+              target = target.filter(value);
+            }
             break;
           default:
             break;
