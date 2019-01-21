@@ -1,6 +1,6 @@
 {
   "name": "cra-rewired",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "override create-react-app config without eject",
   "author": {
     "name": "Sung Won Cha",
@@ -21,13 +21,16 @@
     "cra-rewired": "./bin/cra-rewired.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rollup -c",
+    "prebuild": "rm -rf bin/*",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "immutable": "^4.0.0-rc.12",
     "lodash": "^4.17.11",
     "minimist": "^1.2.0",
-    "object.entries": "^1.0.4",
+    "object.entries": "^1.1.0",
     "proxyquire": "^2.1.0",
     "rewire": "^4.0.1"
   },
@@ -36,11 +39,19 @@
     "react-dom": "^15.0.0 || ^16.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/plugin-proposal-class-properties": "^7.0.0",
-    "@babel/plugin-transform-runtime": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
-    "babel-plugin-annotate-pure-calls": "^0.4.0"
-  }
+    "babel-plugin-annotate-pure-calls": "^0.4.0",
+    "rollup": "^1.1.1",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^4.0.0"
+  },
+  "files": [
+    "src",
+    "bin"
+  ]
 }

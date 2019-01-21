@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // This module was created with reference to the following article.
 // https://daveceddia.com/customize-create-react-app-webpack-without-ejecting/
 const path = require('path');
