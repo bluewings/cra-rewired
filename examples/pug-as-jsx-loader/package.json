@@ -3,17 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2"
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0"
   },
   "devDependencies": {
-    "babel-loader": "^8.0.4",
-    "cra-rewired": "^1.0.8",
-    "pug-as-jsx-loader": "^1.0.59",
-    "react-scripts": "2.0.4"
+    "babel-loader": "^8.0.5",
+    "cra-rewired": "^1.0.15",
+    "pug-as-jsx-loader": "^1.0.62",
+    "react-scripts": "^2.1.3"
   },
   "scripts": {
-    "start": "cra-rewired -s react-scripts -m start -c webpack.custom.js",
+    "start": "../../src/index.js -s react-scripts -m start -c config/webpack.custom.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

@@ -220,6 +220,11 @@ function getConfig(config, paths, packageJson, shared, getCustoms) {
               ...value,
             };
             break;
+          case '$update':
+            if (typeof value === 'function') {
+              target = value(target);
+            }
+            break;
           case '$filter':
             if (typeof value === 'function') {
               target = target.filter(value);
@@ -262,13 +267,14 @@ switch (args.mode) {
     // Load customizations from the config-overrides.testing file.
     // That file should export a single function that takes a config and returns a config
     const customizer = loadCustomizer(args.config);
+    process.argv = [];
     proxyquire(`${args.script}/scripts/test.js`, {
-      // When test.js asks for '../utils/createJestConfig' it will get this instead:
-      '../utils/createJestConfig': (...args) => {
+      // When test.js asks for './utils/createJestConfig' it will get this instead:
+      './utils/createJestConfig': (...params) => {
         // Use the existing createJestConfig function to create a config, then pass
         // it through the customizer
-        const createJestConfig = require(`${args.script}/utils/createJestConfig`);
-        return customizer(createJestConfig(...args));
+        const createJestConfig = require(`${args.script}/scripts/utils/createJestConfig`);
+        return customizer(createJestConfig(...params));
       },
     });
     break;
