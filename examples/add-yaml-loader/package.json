@@ -13,7 +13,7 @@
     "yaml-loader": "^0.5.0"
   },
   "scripts": {
-    "start": "cra-rewired -s react-scripts -m start -c webpack.custom.js",
+    "start": "node ../../src -s react-scripts -m start -c webpack.custom.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
