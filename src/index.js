@@ -42,10 +42,14 @@ function getArgs() {
   return args;
 }
 
+function getCustom(module) {
+  const custom = require(module);
+  return custom;
+}
+
 // Attempt to load the given module and return null if it fails.
-function loadCustomizer(module) {
+function loadCustomizer(custom) {
   try {
-    const custom = require(module);
     return (config, paths, packageJson, shared) => getConfig(config, paths, packageJson, shared, custom);
   } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') {
@@ -131,12 +135,14 @@ function rewireModule(modulePath, customizer) {
 
 const args = getArgs();
 
+const custom = getCustom(args.config);
+
 switch (args.mode) {
   // The "start" script is run during development mode
   case 'start': {
     rewireModule(
       `${args.script}/scripts/start.js`,
-      loadCustomizer(args.config),
+      loadCustomizer(custom),
     );
     break;
   }
@@ -145,7 +151,7 @@ switch (args.mode) {
   case 'build': {
     rewireModule(
       `${args.script}/scripts/build.js`,
-      loadCustomizer(args.config),
+      loadCustomizer(custom),
     );
     break;
   }
@@ -154,7 +160,7 @@ switch (args.mode) {
   case 'test': {
     // Load customizations from the config-overrides.testing file.
     // That file should export a single function that takes a config and returns a config
-    const customizer = loadCustomizer(args.config);
+    const customizer = loadCustomizer(custom);
     process.argv = [];
     proxyquire(`${args.script}/scripts/test.js`, {
       // When test.js asks for './utils/createJestConfig' it will get this instead:
