@@ -7,7 +7,6 @@
     "react-dom": "^16.5.2"
   },
   "devDependencies": {
-    "cra-rewired": "^1.0.8",
     "json-loader": "^0.5.7",
     "react-scripts": "2.0.4",
     "yaml-loader": "^0.5.0"
