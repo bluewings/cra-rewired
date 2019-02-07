@@ -1,5 +1,5 @@
-const _ = require('lodash');
-const entries = require('object.entries');
+import _ from 'lodash';
+import entries from 'object.entries';
 
 function aggregate(data, stageOrStages) {
   const stages = Array.isArray(stageOrStages) ? stageOrStages : [stageOrStages];
@@ -50,7 +50,10 @@ function getConfig(config, paths, packageJson, shared, getCustoms) {
 
   if (customs.$proxyConfig) {
     shared.$proxyConfig = entries(customs.$proxyConfig)
-      .map(([operation, value]) => ({ operation, value }));
+      .map(([operation, value]) => ({
+        operation,
+        value
+      }));
   }
 
   if (customs.$moduleScope) {
@@ -114,4 +117,4 @@ function getConfig(config, paths, packageJson, shared, getCustoms) {
   return config;
 }
 
-module.exports = getConfig;
+export default getConfig;

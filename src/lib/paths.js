@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
+import path from 'path';
+import fs from 'fs';
+import url from 'url';
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebook/create-react-app/issues/637
@@ -76,4 +76,4 @@ function getPaths(paths, packageJson, shared, getCustoms) {
   return paths;
 }
 
-module.exports = getPaths;
+export default getPaths;

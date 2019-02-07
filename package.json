@@ -1,6 +1,6 @@
 {
   "name": "cra-rewired",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "override create-react-app config without eject",
   "author": {
     "name": "Cha Sung Won",

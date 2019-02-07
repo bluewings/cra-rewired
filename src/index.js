@@ -1,13 +1,11 @@
 // This module was created with reference to the following article.
 // https://daveceddia.com/customize-create-react-app-webpack-without-ejecting/
-const path = require('path');
-const _ = require('lodash');
-const entries = require('object.entries');
-const rewire = require('rewire');
-const proxyquire = require('proxyquire');
-const minimist = require('minimist');
-const getConfig = require('./lib/config');
-const getPaths = require('./lib/paths');
+import path from 'path';
+import rewire from 'rewire';
+import proxyquire from 'proxyquire';
+import minimist from 'minimist';
+import getConfig from './lib/config';
+import getPaths from './lib/paths';
 
 function getArgs() {
   const argv = minimist(process.argv.slice(2));
