@@ -114,4 +114,4 @@ function getConfig(config, paths, packageJson, shared, getCustoms) {
   return config;
 }
 
-module.exports.getConfig = getConfig;
+module.exports = getConfig;

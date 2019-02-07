@@ -6,7 +6,8 @@ const entries = require('object.entries');
 const rewire = require('rewire');
 const proxyquire = require('proxyquire');
 const minimist = require('minimist');
-const { getConfig } = require('./utils');
+const getConfig = require('./lib/config');
+const getPaths = require('./lib/paths');
 
 function getArgs() {
   const argv = minimist(process.argv.slice(2));
@@ -50,7 +51,10 @@ function getCustom(module) {
 // Attempt to load the given module and return null if it fails.
 function loadCustomizer(custom) {
   try {
-    return (config, paths, packageJson, shared) => getConfig(config, paths, packageJson, shared, custom);
+    return {
+      paths: (paths, packageJson, shared) => getPaths(paths, packageJson, shared, custom),
+      config: (config, paths, packageJson, shared) => getConfig(config, paths, packageJson, shared, custom),
+    }
   } catch (e) {
     if (e.code !== 'MODULE_NOT_FOUND') {
       throw e;
@@ -59,13 +63,26 @@ function loadCustomizer(custom) {
 
   // If the module doesn't exist, return a
   // noop that simply returns the config it's given.
-  return config => config;
+  return {
+    paths: paths => paths,
+    config: config => config,
+  }
 }
 
 function rewireModule(modulePath, customizer) {
   // Load the module with `rewire`, which allows modifying the
   // script's internal variables.
   const defaults = rewire(modulePath);
+
+  let paths = defaults.__get__('paths');
+  const packageJson = require(paths.appPackageJson);
+  const newPaths = customizer.paths(paths, { ...packageJson }, {});
+  if (JSON.stringify(paths) !== JSON.stringify(newPaths)) {
+    defaults.__set__('paths', () => {
+      return newPaths;
+    });
+    paths = defaults.__get__('paths');
+  }
 
   // Reach into the module, grab its global 'config' variable,
   // and pass it through the customizer function.
@@ -79,7 +96,6 @@ function rewireModule(modulePath, customizer) {
   } catch(ignore) {
     configFactory = defaults.__get__('configFactory');
   }
-  const paths = defaults.__get__('paths');
   let prepareProxy;
   try {
     prepareProxy = defaults.__get__('prepareProxy');
@@ -116,10 +132,8 @@ function rewireModule(modulePath, customizer) {
     });
   }
 
-  const packageJson = require(paths.appPackageJson);
-
   const updateConfig = (configOpts) => {
-    customizer(configOpts, { ...paths }, { ...packageJson }, shared);
+    customizer.config(configOpts, { ...paths }, { ...packageJson }, shared);
   };
 
   if (config) {
@@ -168,7 +182,7 @@ switch (args.mode) {
         // Use the existing createJestConfig function to create a config, then pass
         // it through the customizer
         const createJestConfig = require(`${args.script}/scripts/utils/createJestConfig`);
-        return customizer(createJestConfig(...params));
+        return customizer.config(createJestConfig(...params));
       },
     });
     break;
