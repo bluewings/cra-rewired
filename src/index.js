@@ -1,11 +1,11 @@
 // This module was created with reference to the following article.
 // https://daveceddia.com/customize-create-react-app-webpack-without-ejecting/
-import path from 'path';
-import rewire from 'rewire';
-import proxyquire from 'proxyquire';
-import minimist from 'minimist';
 import getConfig from './lib/config';
 import getPaths from './lib/paths';
+const path = require('path');
+const rewire = require('rewire');
+const proxyquire = require('proxyquire');
+const minimist = require('minimist');
 
 function getArgs() {
   const argv = minimist(process.argv.slice(2));

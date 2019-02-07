@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import entries from 'object.entries';
+const _ = require('lodash');
+const entries = require('object.entries');
 
 function aggregate(data, stageOrStages) {
   const stages = Array.isArray(stageOrStages) ? stageOrStages : [stageOrStages];
