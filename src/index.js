@@ -36,8 +36,12 @@ function getArgs() {
     throw new Error('config is required.');
   }
 
-  args.script = path.join(process.env.PWD, 'node_modules', args.script);
-  args.config = path.join(process.env.PWD, path.normalize(args.config));
+  let pwd = process.env.PWD;
+  if (!pwd && typeof process.cwd === 'function') {
+    pwd = process.cwd();
+  }
+  args.script = path.join(pwd, 'node_modules', args.script);
+  args.config = path.join(pwd, args.config);
   return args;
 }
 
