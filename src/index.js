@@ -37,7 +37,7 @@ function getArgs() {
   }
 
   args.script = path.join(process.env.PWD, 'node_modules', args.script);
-  args.config = path.join(process.env.PWD, args.config);
+  args.config = path.join(process.env.PWD, path.normalize(args.config));
   return args;
 }
 
