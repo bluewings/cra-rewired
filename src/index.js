@@ -2,6 +2,7 @@
 // https://daveceddia.com/customize-create-react-app-webpack-without-ejecting/
 import getConfig from './lib/config';
 import getPaths from './lib/paths';
+const fs = require('fs');
 const path = require('path');
 const rewire = require('rewire');
 const proxyquire = require('proxyquire');
@@ -40,7 +41,9 @@ function getArgs() {
   if (!pwd && typeof process.cwd === 'function') {
     pwd = process.cwd();
   }
-  args.script = path.join(pwd, 'node_modules', args.script);
+  args.script = pwd.split(path.sep)
+    .map((e, i, arr) => path.join(arr.slice(0, arr.length - i).join(path.sep), 'node_modules', args.script))
+    .find(e => fs.existsSync(e)) || args.script;
   args.config = path.join(pwd, args.config);
   return args;
 }
